@@ -1,0 +1,82 @@
+! ===== SW1 (Cisco IOL switch) =====
+! Si 'line aux 0' da error en el switch IOL, omitir ese bloque.
+enable
+configure terminal
+hostname SW1
+ip domain-name lab.local
+no ip domain-lookup
+service password-encryption
+service timestamps log datetime msec localtime
+service timestamps debug datetime msec localtime
+!
+interface vlan 1
+ ip address 10.8.40.2 255.255.255.0
+ no shutdown
+exit
+ip default-gateway 10.8.40.1
+!
+interface e0/1
+ description HACIA-DC01
+ switchport mode access
+ no shutdown
+exit
+!
+username admin privilege 15 secret Cisco123!
+enable secret Cisco123!
+!
+privilege exec level 5 show ip interface brief
+privilege exec level 5 show logging
+privilege exec level 10 show running-config
+privilege exec level 10 show aaa servers
+!
+aaa new-model
+radius server NPS
+ address ipv4 10.8.40.10 auth-port 1812 acct-port 1813
+ key Radius123!
+exit
+!
+aaa authentication login default local
+aaa authentication login CON-AUTH group radius local
+aaa authorization exec CON-AUTH group radius local
+aaa accounting exec default start-stop group radius
+aaa accounting commands 0 default start-stop group radius
+aaa accounting commands 5 default start-stop group radius
+aaa accounting commands 10 default start-stop group radius
+aaa accounting commands 15 default start-stop group radius
+!
+login block-for 60 attempts 3 within 30
+login on-failure log
+login on-success log
+logging buffered 16384 informational
+!
+crypto key generate rsa modulus 2048
+ip ssh version 2
+ip ssh time-out 60
+ip ssh authentication-retries 3
+!
+line con 0
+ login authentication CON-AUTH
+ authorization exec CON-AUTH
+ exec-timeout 10 0
+ logging synchronous
+exit
+line aux 0
+ login authentication CON-AUTH
+ authorization exec CON-AUTH
+ exec-timeout 10 0
+exit
+line vty 0 4
+ login authentication default
+ transport input ssh
+ exec-timeout 5 0
+exit
+end
+write memory
+
+! ===== Verificación =====
+! test aaa group radius u0 Cisco123! legacy
+! test aaa group radius u5 Cisco123! legacy
+! test aaa group radius u10 Cisco123! legacy
+! show aaa servers
+! show logging
+! show ip ssh

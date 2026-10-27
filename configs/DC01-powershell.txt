@@ -1,0 +1,43 @@
+# ===== DC01 (Windows Server en VMware, PowerShell como administrador) =====
+# Red: la tarjeta conectada a VMnet2 es Ethernet1 (Ethernet0 es la NAT de VMware)
+Set-DnsClientServerAddress -InterfaceAlias "Ethernet0" -ResetServerAddresses
+Disable-NetAdapter -Name "Ethernet0" -Confirm:$false
+New-NetIPAddress -InterfaceAlias "Ethernet1" -IPAddress 10.8.40.10 -PrefixLength 24 -DefaultGateway 10.8.40.1
+Set-DnsClientServerAddress -InterfaceAlias "Ethernet1" -ServerAddresses 127.0.0.1
+New-NetFirewallRule -DisplayName "ICMP-Permitir" -Protocol ICMPv4 -IcmpType 8 -Action Allow
+Rename-Computer -NewName DC01 -Restart
+
+# ===== Active Directory =====
+Install-WindowsFeature AD-Domain-Services -IncludeManagementTools
+Install-ADDSForest -DomainName "lab.local" -DomainNetbiosName "LAB" -InstallDns -SafeModeAdministratorPassword (ConvertTo-SecureString "Admin123!" -AsPlainText -Force) -Force
+
+# ===== Grupos nivel 0, 5 y 10, y usuarios =====
+New-ADGroup -Name "Nivel0"  -GroupScope Global -GroupCategory Security
+New-ADGroup -Name "Nivel5"  -GroupScope Global -GroupCategory Security
+New-ADGroup -Name "Nivel10" -GroupScope Global -GroupCategory Security
+
+$pw = ConvertTo-SecureString "Cisco123!" -AsPlainText -Force
+New-ADUser -Name "u0"  -SamAccountName "u0"  -AccountPassword $pw -Enabled $true -PasswordNeverExpires $true
+New-ADUser -Name "u5"  -SamAccountName "u5"  -AccountPassword $pw -Enabled $true -PasswordNeverExpires $true
+New-ADUser -Name "u10" -SamAccountName "u10" -AccountPassword $pw -Enabled $true -PasswordNeverExpires $true
+
+Add-ADGroupMember -Identity "Nivel0"  -Members "u0"
+Add-ADGroupMember -Identity "Nivel5"  -Members "u5"
+Add-ADGroupMember -Identity "Nivel10" -Members "u10"
+
+# ===== NPS =====
+Install-WindowsFeature NPAS -IncludeManagementTools
+netsh nps add registeredserver
+netsh nps add client name="R1"  address=10.8.40.1 state=enable sharedsecret=Radius123!
+netsh nps add client name="SW1" address=10.8.40.2 state=enable sharedsecret=Radius123!
+
+# ===== Políticas de red (nps.msc, por GUI) =====
+# Se crean 3 políticas (Nivel0, Nivel5, Nivel10), y se deshabilitan las 2 por defecto:
+#  - Tipo de servidor de acceso: Unspecified
+#  - Condición: Windows Groups = LAB\NivelX
+#  - Access granted
+#  - Autenticación: solo PAP (Unencrypted authentication)
+#  - Standard: se quita Framed-Protocol y Service-Type = Login
+#  - Vendor Specific: Cisco-AV-Pair = shell:priv-lvl=0 / 5 / 10
+net stop ias
+net start ias
