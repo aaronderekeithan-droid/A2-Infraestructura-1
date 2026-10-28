@@ -118,6 +118,13 @@ line aux 0
  authorization exec CON-AUTH
  login authentication CON-AUTH
 line vty 0 4
+
+R1#show running-config | include authorization
+aaa authorization console
+aaa authorization exec CON-AUTH group radius local 
+ authorization exec CON-AUTH
+ authorization exec CON-AUTH
+R1#
  exec-timeout 5 0
  transport input ssh
 !
