@@ -146,3 +146,10 @@ line vty 0 4
 !
 !
 end
+
+SW1#show running-config | include authorization
+aaa authorization console
+aaa authorization exec CON-AUTH group radius local 
+ authorization exec CON-AUTH
+ authorization exec CON-AUTH
+SW1#
