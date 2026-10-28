@@ -1,4 +1,4 @@
-! ===== SW1 (Cisco IOL switch) =====
+ ===== SW1 (Cisco IOL switch) =====
 ! Si 'line aux 0' da error en el switch IOL, omitir ese bloque.
 enable
 configure terminal
@@ -24,6 +24,7 @@ exit
 username admin privilege 15 secret Cisco123!
 enable secret Cisco123!
 !
+privilege exec level 0 show privilege
 privilege exec level 5 show ip interface brief
 privilege exec level 5 show logging
 privilege exec level 10 show running-config
@@ -37,6 +38,7 @@ exit
 !
 aaa authentication login default local
 aaa authentication login CON-AUTH group radius local
+aaa authorization console
 aaa authorization exec CON-AUTH group radius local
 aaa accounting exec default start-stop group radius
 aaa accounting commands 0 default start-stop group radius
@@ -72,7 +74,7 @@ line vty 0 4
 exit
 end
 write memory
-
+ 
 ! ===== Verificación =====
 ! test aaa group radius u0 Cisco123! legacy
 ! test aaa group radius u5 Cisco123! legacy

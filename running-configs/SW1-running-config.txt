@@ -1,26 +1,29 @@
-Current configuration : 2014 bytes
+Current configuration : 2026 bytes
 !
-! Last configuration change at 18:56:39 UTC Tue Oct 27 2026
+! Last configuration change at 03:07:35 UTC Wed Oct 28 2026 by u10
 !
-version 15.4
+version 15.2
 service timestamps debug datetime msec localtime
 service timestamps log datetime msec localtime
 service password-encryption
+service compress-config
 !
-hostname R1
+hostname SW1
 !
 boot-start-marker
 boot-end-marker
 !
 !
 logging buffered 16384 informational
-enable secret 5 $1$h0sF$PT.3HQXLMpatofNlIZbFv1
+enable secret 5 $1$1pqj$MVPslTfjd2G2Iab0AY0md/
 !
+username admin privilege 15 secret 5 $1$/pMm$GSNiNAiIr0P8/Xt2nwpn6/
 aaa new-model
 !
 !
 aaa authentication login default local
 aaa authentication login CON-AUTH group radius local
+aaa authorization console
 aaa authorization exec CON-AUTH group radius local 
 aaa accounting exec default start-stop group radius
 !
@@ -28,11 +31,8 @@ aaa accounting exec default start-stop group radius
 !
 !
 !
+!
 aaa session-id common
-mmi polling-interval 60
-no mmi auto-configure
-no mmi pvc
-mmi snmp-timeout 180
 !
 !
 !
@@ -41,36 +41,21 @@ mmi snmp-timeout 180
 !
 !
 !
-
-
-!
-!
-!
-!
-no ip domain lookup
-ip domain name lab.local
+no ip domain-lookup
+ip domain-name lab.local
 ip cef
 login block-for 60 attempts 3 within 30
 login on-failure log
 login on-success log
 no ipv6 cef
 !
-multilink bundle-name authenticated
 !
 !
+spanning-tree mode rapid-pvst
+spanning-tree extend system-id
 !
+vlan internal allocation policy ascending
 !
-!
-!
-!
-!
-username admin privilege 15 secret 5 $1$Dvet$U1hdymoR5f4E3iheQS2dy.
-!
-redundancy
-!
-!
-ip ssh time-out 60
-ip ssh version 2
 ! 
 !
 !
@@ -85,26 +70,25 @@ ip ssh version 2
 !
 !
 interface Ethernet0/0
- description HACIA-SW1
- ip address 10.8.40.1 255.255.255.0
 !
 interface Ethernet0/1
- no ip address
- shutdown
+ switchport mode access
 !
 interface Ethernet0/2
- no ip address
- shutdown
 !
 interface Ethernet0/3
- no ip address
- shutdown
 !
+interface Vlan1
+ ip address 10.8.40.2 255.255.255.0
+!
+ip default-gateway 10.8.40.1
 ip forward-protocol nd
-!
 !
 no ip http server
 no ip http secure-server
+!
+ip ssh time-out 60
+ip ssh version 2
 !
 !
 !
@@ -118,20 +102,15 @@ radius server NPS
 !
 control-plane
 !
-!
-!
-!
-!
-!
-!
 privilege exec level 10 show aaa servers
 privilege exec level 10 show aaa
 privilege exec level 5 show ip interface brief
 privilege exec level 5 show ip interface
 privilege exec level 5 show ip
-privilege exec level 5 show logging
 privilege exec level 10 show running-config
-privilege exec level 10 show
+privilege exec level 5 show logging
+privilege exec level 0 show privilege
+privilege exec level 0 show
 !
 line con 0
  authorization exec CON-AUTH
