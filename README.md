@@ -4,9 +4,7 @@
 
 ##  Video demostrativo
 
-[![Video demostrativo](https://img.shields.io/badge/YouTube-Ver%20video-red?logo=youtube)]([PEGA-AQUI-EL-LINK-DE-YOUTUBE](https://youtu.be/oGAVpDd3XXU))
-
-**Enlace:** [PEGA-AQUI-EL-LINK-DE-YOUTUBE](https://youtu.be/oGAVpDd3XXU)
+**Enlace:** https://youtu.be/oGAVpDd3XXU
 
 ---
 
