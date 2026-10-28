@@ -4,9 +4,9 @@
 
 ##  Video demostrativo
 
-[![Video demostrativo](https://img.shields.io/badge/YouTube-Ver%20video-red?logo=youtube)](PEGA-AQUI-EL-LINK-DE-YOUTUBE)
+[![Video demostrativo](https://img.shields.io/badge/YouTube-Ver%20video-red?logo=youtube)]([PEGA-AQUI-EL-LINK-DE-YOUTUBE](https://youtu.be/oGAVpDd3XXU))
 
-**Enlace:** PEGA-AQUI-EL-LINK-DE-YOUTUBE
+**Enlace:** [PEGA-AQUI-EL-LINK-DE-YOUTUBE](https://youtu.be/oGAVpDd3XXU)
 
 ---
 
@@ -91,14 +91,14 @@ Todos los scripts usados están en el repositorio:
 
 ### Router y switch
 
-Se configuró AAA con una lista `CON-AUTH` (RADIUS con respaldo local) aplicada solo a las líneas `con 0` y `aux 0`, accounting por RADIUS, bloqueo por intentos fallidos, logs de login, y SSH versión 2 en las líneas vty con el usuario local.
+Se configuró AAA con una lista `CON-AUTH` (RADIUS con respaldo local) aplicada solo a las líneas `con 0` y `aux 0`, autorización de `exec` por RADIUS (con `aaa authorization console`, necesario para que IOS aplique el nivel de privilegio en la consola), accounting por RADIUS, bloqueo por intentos fallidos, logs de login, y SSH versión 2 en las líneas vty con el usuario local.
 
 ##  Pruebas y evidencias
 
 | # | Prueba | Resultado esperado |
 |---|---|---|
 | 1 | `test aaa group radius u0/u5/u10 ... legacy` | `User was successfully authenticated` |
-| 2 | Login por consola con `u0`, `u5` y `u10` y `show privilege` | Niveles 0, 5 y 10 |
+| 2 | Login por consola con `u0`, `u5` y `u10` (sin usar `enable`) y `show privilege` | Niveles 0, 5 y 10 |
 | 3 | SSH con `admin` a R1 y SW1 | Acceso concedido |
 
 
